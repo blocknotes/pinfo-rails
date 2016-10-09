@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'pinfo-rails'
+
+puts PinfoRails::PinfoRails.info( ARGV )

@@ -1,0 +1,5 @@
+# Configuration sample
+#no-cache
+#no-deploy
+#no-styles
+required=redis,solr

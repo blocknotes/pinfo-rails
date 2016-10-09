@@ -1,0 +1,21 @@
+# generic rules
+Metrics/LineLength:
+  Enabled: false
+Style/FileName:
+  Enabled: false
+Style/SpaceInsideBrackets:
+  Enabled: false
+Style/SpaceInsideParens:
+  Enabled: false
+
+# specific project rules
+Metrics/AbcSize:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Enabled: false
+Style/RescueModifier:
+  Enabled: false
