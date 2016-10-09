@@ -13,8 +13,7 @@ Gem::Specification.new do |spec|
   spec.authors     = PinfoRails::AUTHORS.map { |a| a[0] }.flatten
   spec.email       = PinfoRails::AUTHORS.first[1]
   spec.files       = ['lib/pinfo-rails.rb']
-  spec.homepage    =
-    'http://rubygems.org/gems/pinfo-rails'
+  spec.homepage    = 'https://github.com/blocknotes/pinfo-rails'
   spec.license     = 'MIT'
   spec.add_runtime_dependency 'colorize', '~> 0.8.0'
   spec.executables << 'pinfo'
