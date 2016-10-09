@@ -1,7 +1,7 @@
 
 # pinfo-rails: Rails project info
 
-A gem to collect informations from a Rails project
+An utility to collect informations from a Rails project
 
 Currently I added only some basic checks, feel free to contact me (or pull request) to improve this project.
 
@@ -12,6 +12,12 @@ Currently I added only some basic checks, feel free to contact me (or pull reque
 - Fetch informations without running Rails (faster, easier)
 - Options from a global config file (`~/.pinfo-rails.conf`)
 - Options from config file (see sample conf)
+
+### Usage
+
+- Install the gem: `gem install pinfo-rails`
+- Enter in a Rails project directory
+- Execute: `pinfo`
 
 ### Sample output
 
