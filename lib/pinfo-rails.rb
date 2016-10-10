@@ -6,11 +6,11 @@ require 'yaml'
 
 module PinfoRails
   NAME = 'pinfo-rails'.freeze
-  DATE = '2016-10-08'.freeze
+  DATE = '2016-10-10'.freeze
   INFO = 'Rails project info'.freeze
   DESC = 'A gem to collect informations from a Rails project'.freeze
   AUTHORS = [ [ 'Mattia Roccoberton', 'mat@blocknot.es', 'http://blocknot.es' ] ].freeze
-  VERSION = [ 0, 1, 2 ].freeze
+  VERSION = [ 0, 1, 4 ].freeze
 
   FILES = {
     conf_db: 'config/database.yml',
@@ -23,7 +23,7 @@ module PinfoRails
     gemfile: 'Gemfile'
   }.freeze
   PATTERNS = {
-    cache: /config.cache_classes.*/,
+    cache: /\A\s*config.cache_classes.*|\A\s*config.action_controller.perform_caching.*/,
     deploy_info: /branch\s*,.*|user\s*,.*|domain\s*,.*|server[^,]+/,
     deploy_tool: /'capistrano'|"capistrano|'capistrano-rails'|"capistrano-rails"|'mina'|"mina"/,
     deploy_user: /user.*/,
@@ -36,7 +36,6 @@ module PinfoRails
     def self.info( args )
       @conf = {}
       @options = optparse( args )
-
       @output = ''
       @output += "[verbose mode]\n" if @options[:verbose]
       if @options[:conf]
@@ -50,12 +49,10 @@ module PinfoRails
         end
       end
 
-      # Ruby version
       printline( 'Ruby', { color: :green, mode: :bold }, RUBY_VERSION, @options[:verbose] ? 'p' + RUBY_PATCHLEVEL.to_s : nil )
-      # Rails version
       printline( 'Rails', { color: :green, mode: :bold }, grep( FILES[:gemfile], PATTERNS[:rails] ) )
-      check_database
       check_requirements
+      check_database
       check_cache
       check_deploy
 
@@ -67,14 +64,15 @@ module PinfoRails
     def self.check_cache
       if @options.info[:cache]
         @output += "\n"
-        printline( 'Development', :cyan, grep( FILES[:conf_env_dev], PATTERNS[:cache] ) )
-        printline( 'Staging    ', :yellow, grep( FILES[:conf_env_stag], PATTERNS[:cache] ) )
-        printline( 'Production ', :red, grep( FILES[:conf_env_prod], PATTERNS[:cache] ) )
+        printline( 'Cache development', :cyan, grep( FILES[:conf_env_dev], PATTERNS[:cache] ) )
+        printline( 'Cache staging    ', :yellow, grep( FILES[:conf_env_stag], PATTERNS[:cache] ) )
+        printline( 'Cache production ', :red, grep( FILES[:conf_env_prod], PATTERNS[:cache] ) )
       end
     end
 
     def self.check_database
-      if File.exist? FILES[:conf_db]
+      if @options.info[:database] && File.exist?( FILES[:conf_db] )
+        @output += "\n"
         if @options[:verbose]
           printline FILES[:conf_db], {}, ' '
           @output += cat FILES[:conf_db]
@@ -82,8 +80,21 @@ module PinfoRails
           content = YAML.load_file( FILES[:conf_db] ) rescue nil
           if content.nil?
             @output += "ERR: invalid YAML file: #{FILES[:conf_db]}"
-          elsif content['development']
-            printline( 'DB (development)', :cyan, content['development']['adapter'], content['development']['database'] )
+          else
+            content.sort.each do |env, _data|
+              color =
+                case env
+                when 'staging'
+                  :yellow
+                when 'production'
+                  :red
+                when 'test'
+                  :blue
+                else
+                  :cyan
+                end
+              printline( "Database #{env}", color, param( 'adapter', content[env]['adapter'] ), param( 'host', content[env]['host'] ), param( 'database', content[env]['database'] ), param( 'username', content[env]['username'] ), param( 'password', content[env]['password'] ) )
+            end
           end
         end
       end
@@ -106,7 +117,7 @@ module PinfoRails
 
     def self.check_requirements
       @options.reqs.split( ',' ).each do |req|
-        printline( 'Required', :blue, grep( FILES[:gemfile], Regexp.new( "['|\"][^'\"]*#{req}[^'\"]*['|\"]" ) ) )
+        printline( 'Required', :green, grep( FILES[:gemfile], Regexp.new( "['|\"][^'\"]*#{req}[^'\"]*['|\"]" ) ) )
       end
     end
 
@@ -125,17 +136,23 @@ module PinfoRails
       lines = []
       if File.exist? file
         File.read( file ).each_line do |line|
-          lines.push( Regexp.last_match ) if !( line.strip =~ /^#.*$/ ) && line =~ expression
+          lines.push( Regexp.last_match.to_s.strip ) if !( line.strip =~ /^#.*$/ ) && line =~ expression
         end
       end
       ( lines.length > 1 ? "\n    " : '' ) + lines.join( "\n    " )
     end
 
+    def self.param( k, v )
+      !v.nil? ? ( k + ' = ' + v ) : ''
+    end
+
     def self.printline( intro, styles, *strings )
-      cnt = strings.reject { |s| s.nil? || s.empty? }.length
+      strings = strings.reject { |s| s.nil? || s.empty? }
+      cnt = strings.length
       return unless cnt > 0
       @output += '- ' + intro + ': '
-      @output += @options[:styles] ? strings.compact.map( &:to_s ).join( ', ' ).colorize( styles ) : strings.compact.map( &:to_s ).join( ', ' )
+      # @output += "\n    " if cnt > 1
+      @output += @options[:styles] ? strings.map( &:to_s ).join( '; ' ).colorize( styles ) : strings.map( &:to_s ).join( '; ' )
       @output += "\n"
     end
 
@@ -150,6 +167,7 @@ module PinfoRails
       options.styles = true
       options.verbose = false
       options.info = {
+        database: true,
         cache: true,
         deploy: true
       }
@@ -157,33 +175,32 @@ module PinfoRails
       begin
         opt_parser = OptionParser.new do |opts|
           opts.banner = 'Usage: pinfo [options]'
-
           opts.separator ''
           opts.separator 'Specific options:'
-
           opts.on('-cCONF', '--config=CONF', 'Config file') do |v|
             options.conf = v
           end
           opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
             options.verbose = v
           end
-          opts.separator ''
-          opts.on('-s', '--[no-]styles', 'With styles and colors (default)') do |v|
-            options.styles = v
-          end
           opts.on('-rREQS', '--required=REQS', 'Search for specific gems') do |v|
             options.reqs = v
           end
+          opts.on('-s', '--[no-]styles', 'With styles and colors (default)') do |v|
+            options.styles = v
+          end
+          opts.separator ''
           opts.on('--[no-]cache', 'Show cache info') do |v|
             options.info[:cache] = v
+          end
+          opts.on('--[no-]database', 'Show database info') do |v|
+            options.info[:database] = v
           end
           opts.on('--[no-]deploy', 'Show deploy info') do |v|
             options.info[:deploy] = v
           end
-
           opts.separator ''
           opts.separator 'Common options:'
-
           opts.on_tail('-h', '--help', 'Show this message') do
             puts opts
             exit
@@ -203,7 +220,10 @@ module PinfoRails
           opt_parser.parse!( lines )
         end
         opt_parser.parse!( args )
-      rescue Exception => e
+      rescue OptionParser::MissingArgument => e
+        puts 'ERR: ' + e.message
+        exit
+      rescue OptionParser::InvalidOption => e
         puts 'ERR: ' + e.message
         exit
       end

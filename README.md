@@ -24,13 +24,20 @@ Currently I added only some basic checks, feel free to contact me (or pull reque
 ```
 - Ruby: 2.3.0
 - Rails: 'rails', '4.2.5.2'
-- DB (development): mysql2, my_db
 - Required: 'redis-rails'
 - Required: 'sunspot_solr'
 
-- Development: config.cache_classes = false
-- Staging    : config.cache_classes = true
-- Production : config.cache_classes = true
+- Database development: adapter = mysql2; host = localhost; database = my_db; username = root
+
+- Cache development:
+    config.cache_classes = false
+    config.action_controller.perform_caching = false
+- Cache staging    :
+    config.cache_classes = true
+    config.action_controller.perform_caching = true
+- Cache production :
+    config.cache_classes = true
+    config.action_controller.perform_caching = true
 
 - Deploy tool: 'mina'
 - Staging    :
@@ -47,10 +54,11 @@ Currently I added only some basic checks, feel free to contact me (or pull reque
 ```
 -c, --config=CONF                Config file
 -v, --[no-]verbose               Run verbosely
-
--s, --[no-]styles                With styles and colors (default)
 -r, --required=REQS              Search for specific gems
+-s, --[no-]styles                With styles and colors (default)
+
     --[no-]cache                 Show cache info
+    --[no-]database              Show database info
     --[no-]deploy                Show deploy info
 ```
 
