@@ -10,7 +10,7 @@ module PinfoRails
   INFO = 'Rails project info'.freeze
   DESC = 'A gem to collect informations from a Rails project'.freeze
   AUTHORS = [ [ 'Mattia Roccoberton', 'mat@blocknot.es', 'http://blocknot.es' ] ].freeze
-  VERSION = [ 0, 1, 4 ].freeze
+  VERSION = [ 0, 1, 5 ].freeze
 
   FILES = {
     conf_db: 'config/database.yml',
@@ -24,7 +24,7 @@ module PinfoRails
   }.freeze
   PATTERNS = {
     cache: /\A\s*config.cache_classes.*|\A\s*config.action_controller.perform_caching.*/,
-    deploy_info: /branch\s*,.*|user\s*,.*|domain\s*,.*|server[^,]+/,
+    deploy_info: /branch\s*,.*|user\s*,.*|domain\s*,.*|server.*/,
     deploy_tool: /'capistrano'|"capistrano|'capistrano-rails'|"capistrano-rails"|'mina'|"mina"/,
     deploy_user: /user.*/,
     rails: /'rails'.*|"rails".*/
@@ -49,7 +49,7 @@ module PinfoRails
         end
       end
 
-      printline( 'Ruby', { color: :green, mode: :bold }, RUBY_VERSION, @options[:verbose] ? 'p' + RUBY_PATCHLEVEL.to_s : nil )
+      printline( 'Ruby',  { color: :green, mode: :bold }, RUBY_VERSION, @options[:verbose] ? 'p' + RUBY_PATCHLEVEL.to_s : nil )
       printline( 'Rails', { color: :green, mode: :bold }, grep( FILES[:gemfile], PATTERNS[:rails] ) )
       check_requirements
       check_database
