@@ -6,11 +6,11 @@ require 'yaml'
 
 module PinfoRails
   NAME = 'pinfo-rails'.freeze
-  DATE = '2016-10-10'.freeze
+  DATE = '2016-10-12'.freeze
   INFO = 'Rails project info'.freeze
   DESC = 'A gem to collect informations from a Rails project'.freeze
   AUTHORS = [ [ 'Mattia Roccoberton', 'mat@blocknot.es', 'http://blocknot.es' ] ].freeze
-  VERSION = [ 0, 1, 5 ].freeze
+  VERSION = [ 0, 1, 6 ].freeze
 
   FILES = {
     conf_db: 'config/database.yml',
@@ -20,14 +20,18 @@ module PinfoRails
     conf_dep: 'config/deploy.rb',
     conf_dep_stag: 'config/deploy/staging.rb',
     conf_dep_prod: 'config/deploy/production.rb',
-    gemfile: 'Gemfile'
+    gemfile: 'Gemfile',
+    ruby_ver: '.ruby-version',
+    rvmrc: '.rvmrc'
   }.freeze
   PATTERNS = {
     cache: /\A\s*config.cache_classes.*|\A\s*config.action_controller.perform_caching.*/,
     deploy_info: /branch\s*,.*|user\s*,.*|domain\s*,.*|server.*/,
     deploy_tool: /'capistrano'|"capistrano|'capistrano-rails'|"capistrano-rails"|'mina'|"mina"/,
     deploy_user: /user.*/,
-    rails: /'rails'.*|"rails".*/
+    rails: /'rails'.*|"rails".*/,
+    ruby: /ruby\s+.*/,
+    rvmrc: /rvm\s+use.*/
   }.freeze
 
   # pinfo-rails: A gem to collect informations from a Rails project
@@ -49,8 +53,8 @@ module PinfoRails
         end
       end
 
-      printline( 'Ruby',  { color: :green, mode: :bold }, RUBY_VERSION, @options[:verbose] ? 'p' + RUBY_PATCHLEVEL.to_s : nil )
-      printline( 'Rails', { color: :green, mode: :bold }, grep( FILES[:gemfile], PATTERNS[:rails] ) )
+      check_ruby
+      check_rails
       check_requirements
       check_database
       check_cache
@@ -120,6 +124,20 @@ module PinfoRails
         printline( 'Required', :green, grep( FILES[:gemfile], Regexp.new( "['|\"][^'\"]*#{req}[^'\"]*['|\"]" ) ) )
       end
     end
+
+    def self.check_rails
+      printline( 'Rails', { color: :green, mode: :bold }, grep( FILES[:gemfile], PATTERNS[:rails] ) )
+    end
+
+    def self.check_ruby
+      printline( 'Ruby (current)', { color: :green, mode: :bold }, RUBY_VERSION + ' p' + RUBY_PATCHLEVEL.to_s )
+      printline( 'Ruby (.rvmrc)', :green, grep( FILES[:rvmrc], PATTERNS[:rvmrc] ) )
+      ruby_ver = cat( FILES[:ruby_ver] ).strip
+      printline( 'Ruby (.ruby-version)', :green, ruby_ver )
+      printline( 'Ruby (Gemfile)', :green, grep( FILES[:gemfile], PATTERNS[:ruby] ) )
+    end
+
+    ###
 
     def self.cat( file )
       lines = []
