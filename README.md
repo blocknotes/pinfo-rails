@@ -13,7 +13,7 @@ Currently I added some basic checks, feel free to contact me (or pull request) t
 - Colored output
 - Fetch informations directly from files, without running Rails (faster, easier)
 - Options from a global config file (`~/.pinfo-rails.conf`)
-- Options from a local config file (see sample conf)
+- Options from a local config file (see [pinfo-rails.sample_conf](https://github.com/blocknotes/pinfo-rails/blob/master/pinfo-rails.sample_conf))
 
 ### Usage
 
