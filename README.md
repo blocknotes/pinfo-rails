@@ -24,7 +24,8 @@ Currently I added some basic checks, feel free to contact me (or pull request) t
 ### Sample output
 
 ```
-- Ruby: 2.3.0
+- Ruby (current): 2.3.0
+- Ruby (Gemfile): ruby '2.3.0'
 - Rails: 'rails', '4.2.5.2'
 - Required: 'redis-rails'
 - Required: 'sunspot_solr'
