@@ -24,11 +24,11 @@ end
 
 module PinfoRails
   NAME = 'pinfo-rails'.freeze
-  DATE = '2016-10-14'.freeze
+  DATE = '2016-10-15'.freeze
   INFO = 'Rails project info'.freeze
-  DESC = 'A gem to collect informations from a Rails project'.freeze
+  DESC = 'Command line utility to collect informations from a Rails project'.freeze
   AUTHORS = [ [ 'Mattia Roccoberton', 'mat@blocknot.es', 'http://blocknot.es' ] ].freeze
-  VERSION = [ 0, 2, 0 ].freeze
+  VERSION = [ 0, 2, 2 ].freeze
 
   FILES = {
     conf_db: 'config/database.yml',
