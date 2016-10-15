@@ -1,17 +1,19 @@
 
 # pinfo-rails: Rails project info
 
-An utility to collect informations from a Rails project
+An utility to collect informations from a Rails project.
 
-Currently I added only some basic checks, feel free to contact me (or pull request) to improve this project.
+Currently I added some basic checks, feel free to contact me (or pull request) to improve this project.
+
+[https://rubygems.org/gems/pinfo-rails](https://rubygems.org/gems/pinfo-rails)
 
 ### Features
 
 - `pinfo` command line tool
-- Styled output
-- Fetch informations without running Rails (faster, easier)
+- Colored output
+- Fetch informations directly from files, without running Rails (faster, easier)
 - Options from a global config file (`~/.pinfo-rails.conf`)
-- Options from config file (see sample conf)
+- Options from a local config file (see sample conf)
 
 ### Usage
 
@@ -28,6 +30,7 @@ Currently I added only some basic checks, feel free to contact me (or pull reque
 - Required: 'sunspot_solr'
 
 - Database development: adapter = mysql2; host = localhost; database = my_db; username = root
+- Database staging: adapter = mysql2; host = 192.168.1.1; database = stag_db; username = stag; password = stag
 
 - Cache development:
     config.cache_classes = false

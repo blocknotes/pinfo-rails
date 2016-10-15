@@ -1,16 +1,34 @@
 # coding: utf-8
-require 'colorize'
 require 'optparse'
 require 'ostruct'
 require 'yaml'
 
+# extend String for colors
+class String
+  COLORS = {
+    black:   30, light_black:   90,
+    red:     31, light_red:     91,
+    green:   32, light_green:   92,
+    yellow:  33, light_yellow:  93,
+    blue:    34, light_blue:    94,
+    magenta: 35, light_magenta: 95,
+    cyan:    36, light_cyan:    96,
+    white:   37, light_white:   97,
+    default: 39
+  }.freeze
+
+  def color( col )
+    "\e[#{COLORS[col]}m#{self}\e[0m"
+  end
+end
+
 module PinfoRails
   NAME = 'pinfo-rails'.freeze
-  DATE = '2016-10-12'.freeze
+  DATE = '2016-10-14'.freeze
   INFO = 'Rails project info'.freeze
   DESC = 'A gem to collect informations from a Rails project'.freeze
   AUTHORS = [ [ 'Mattia Roccoberton', 'mat@blocknot.es', 'http://blocknot.es' ] ].freeze
-  VERSION = [ 0, 1, 6 ].freeze
+  VERSION = [ 0, 2, 0 ].freeze
 
   FILES = {
     conf_db: 'config/database.yml',
@@ -27,7 +45,7 @@ module PinfoRails
   PATTERNS = {
     cache: /\A\s*config.cache_classes.*|\A\s*config.action_controller.perform_caching.*/,
     deploy_info: /branch\s*,.*|user\s*,.*|domain\s*,.*|server.*/,
-    deploy_tool: /'capistrano'|"capistrano|'capistrano-rails'|"capistrano-rails"|'mina'|"mina"/,
+    deploy_tool: /'capistrano'|"capistrano"|'capistrano-rails'|"capistrano-rails"|'mina'|"mina"/,
     deploy_user: /user.*/,
     rails: /'rails'.*|"rails".*/,
     ruby: /ruby\s+.*/,
@@ -107,7 +125,7 @@ module PinfoRails
     def self.check_deploy
       if @options.info[:deploy]
         @output += "\n"
-        printline( 'Deploy tool', { color: :green, mode: :bold }, grep( FILES[:gemfile], PATTERNS[:deploy_tool] ) )
+        printline( 'Deploy tool', :light_green, grep( FILES[:gemfile], PATTERNS[:deploy_tool] ) )
         if @options[:verbose]
           printline FILES[:conf_dep], {}, ' '
           @output += cat FILES[:conf_dep]
@@ -121,16 +139,16 @@ module PinfoRails
 
     def self.check_requirements
       @options.reqs.split( ',' ).each do |req|
-        printline( 'Required', :green, grep( FILES[:gemfile], Regexp.new( "['|\"][^'\"]*#{req}[^'\"]*['|\"]" ) ) )
+        printline( 'Required', :green, grep( FILES[:gemfile], Regexp.new( "'[^']*#{req}[^']*'.*|\"[^\"]*#{req}[^\"]*\".*" ) ) )
       end
     end
 
     def self.check_rails
-      printline( 'Rails', { color: :green, mode: :bold }, grep( FILES[:gemfile], PATTERNS[:rails] ) )
+      printline( 'Rails', :light_green, grep( FILES[:gemfile], PATTERNS[:rails] ) )
     end
 
     def self.check_ruby
-      printline( 'Ruby (current)', { color: :green, mode: :bold }, RUBY_VERSION + ' p' + RUBY_PATCHLEVEL.to_s )
+      printline( 'Ruby (current)', :light_green, RUBY_VERSION + ' p' + RUBY_PATCHLEVEL.to_s )
       printline( 'Ruby (.rvmrc)', :green, grep( FILES[:rvmrc], PATTERNS[:rvmrc] ) )
       ruby_ver = cat( FILES[:ruby_ver] ).strip
       printline( 'Ruby (.ruby-version)', :green, ruby_ver )
@@ -154,7 +172,7 @@ module PinfoRails
       lines = []
       if File.exist? file
         File.read( file ).each_line do |line|
-          lines.push( Regexp.last_match.to_s.strip ) if !( line.strip =~ /^#.*$/ ) && line =~ expression
+          lines.push( Regexp.last_match[1].nil? ? Regexp.last_match.to_s.strip : Regexp.last_match[1].to_s.strip ) if !( line.strip =~ /^#.*$/ ) && line =~ expression
         end
       end
       ( lines.length > 1 ? "\n    " : '' ) + lines.join( "\n    " )
@@ -170,7 +188,7 @@ module PinfoRails
       return unless cnt > 0
       @output += '- ' + intro + ': '
       # @output += "\n    " if cnt > 1
-      @output += @options[:styles] ? strings.map( &:to_s ).join( '; ' ).colorize( styles ) : strings.map( &:to_s ).join( '; ' )
+      @output += @options[:styles] ? strings.map( &:to_s ).join( '; ' ).color( styles ) : strings.map( &:to_s ).join( '; ' )
       @output += "\n"
     end
 
@@ -223,11 +241,11 @@ module PinfoRails
             puts opts
             exit
           end
-          opts.on_tail('--about', 'Show about') do
+          opts.on_tail('-A', '--about', 'Show about') do
             puts INFO + ' v' + VERSION.join('.') + "\n" + DESC + "\nby " + AUTHORS.first.join( ', ' )
             exit
           end
-          opts.on_tail('--version', 'Show version') do
+          opts.on_tail('-V', '--version', 'Show version') do
             puts VERSION.join('.')
             exit
           end

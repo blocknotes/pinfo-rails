@@ -15,6 +15,5 @@ Gem::Specification.new do |spec|
   spec.files       = ['lib/pinfo-rails.rb']
   spec.homepage    = 'https://github.com/blocknotes/pinfo-rails'
   spec.license     = 'MIT'
-  spec.add_runtime_dependency 'colorize', '~> 0.8.0'
   spec.executables << 'pinfo'
 end
