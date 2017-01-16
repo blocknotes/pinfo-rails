@@ -1,5 +1,13 @@
+# PROJECT UNMAINTAINED
 
-# pinfo-rails: Rails project info
+> *This project is not maintained anymore*
+>
+> *If you like it or continue to use it fork it please.*
+
+---
+---
+
+# pinfo-rails: Rails project info [![Gem Version](https://badge.fury.io/rb/pinfo-rails.svg)](https://badge.fury.io/rb/pinfo-rails)
 
 An utility to collect informations from a Rails project.
 
@@ -69,3 +77,7 @@ Currently I added some basic checks, feel free to contact me (or pull request) t
 ### History
 
 When I started to work with Ruby on Rails often I had to switch projects to make minor updates, add new features, fix things; and to publish the changes I created a small script to fetch for config informations. After some times I decided to make a gem for that purpose, this gem.
+
+---
+
+My website: <https://blocknot.es/>
